@@ -1,4 +1,5 @@
 import TodoList from "./Components/TodoList/TodoList";
+import DeleteModal from "./Components/DeleteModal/DeleteModal";
 import "./App.css";
 import { useState } from "react";
 import { IoMdClose } from "react-icons/io";
@@ -89,6 +90,8 @@ const removeTodo = (id)=>{
               )}
             </div>
           </div>
+
+          
 
     </div>
   );
