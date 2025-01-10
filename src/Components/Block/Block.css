@@ -1,0 +1,12 @@
+.number_block{
+    height: 80px;
+    width: 80px;
+    background: lightgray;
+    margin: 5px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 45px;
+    font-weight: 400;
+    color: #fff;
+}
