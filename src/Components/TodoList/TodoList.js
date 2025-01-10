@@ -2,73 +2,80 @@ import React, { useState } from "react";
 import { FaRegTrashAlt } from "react-icons/fa";
 import { IoMdClose } from "react-icons/io";
 import { MdModeEdit } from "react-icons/md";
+import { v4 as uuidv4 } from 'uuid';
 import DeleteModal from "../DeleteModal/DeleteModal";
 import "./TodoList.css";
 import EditModal from "../EditModal/EditModal";
 
-function TodoList(props) {
+function TodoList({todo, onRemove, setTodo, todoList}) {
   const [isShowAddInput, setIsShowAddInput] = useState(false);
-  const [todos, setTodos] = useState([]);
   const [todoTitle, setTodoTitle] = useState("");
   const [isShowDeleteModal, setIsShowDeleteModal] = useState(false);
   const [isShowEditModal, setIsShowEditModal] = useState(false);
   const [todoId, setTodoId] = useState(null);
-  const [todoNewValu, setTodoNewValue] = useState("");
+  const [todoNewValue, setTodoNewValue] = useState("");
 
   const addTodo = (event) => {
     event.preventDefault();
     if (todoTitle) {
-      let newTodoObject = {
-        id: todos.length + 1,
+      let newTodoChild = {
+        id: uuidv4(),
         title: todoTitle,
       };
 
-      setTodos((prevState) => {
-        return [...prevState, newTodoObject];
+      const newTodoList = todoList.map(todoListItem => {
+        if (todoListItem.id === todo.id) {
+          return {
+            ...todo,
+            children: [...todo.children, newTodoChild],
+          }
+        }
+        return todoListItem;
       });
-
+      setTodo(newTodoList);
       setTodoTitle("");
     } else {
       setIsShowAddInput(false);
     }
   };
 
-  const removeTodo = (todoId) => {
-    let newTodos = todos.filter((todo) => {
-      return todo.id !== todoId;
-    });
-
-    setTodos(newTodos);
-  };
+  // const removeTodo = (todoId) => {
+  //   let newTodos = todos.filter((todo) => {
+  //     return todo.id !== todoId;
+  //   });
+  //
+  //   setTodos(newTodos);
+  // };
 
   const deleteModalCancelAction = () => {
     setIsShowDeleteModal(false);
   };
+
   const deleteModalSubmitAction = (id) => {
-    props.onRemove(todoId);
+    onRemove(todoId);
     setIsShowDeleteModal(false);
   };
 
-  const todoUpdate = () => {
-    if (todoNewValu) {
-      let ntodo = todos.find((item) => item.id === todoId);
-      ntodo.title = todoNewValu;
-    }
-
-    setTodoNewValue("");
-    setIsShowEditModal(false);
-  };
+  // const todoUpdate = () => {
+  //   if (todoNewValue) {
+  //     let ntodo = todos.find((item) => item.id === todoId);
+  //     ntodo.title = todoNewValue;
+  //   }
+  //
+  //   setTodoNewValue("");
+  //   setIsShowEditModal(false);
+  // };
 
   return (
     <div>
       <div className="todo_container">
         <div className="title_container">
-          <h2 className="todo_title">{props.title}</h2>
+          <h2 className="todo_title">{todo.title}</h2>
           <button
             className="todo_item_btn"
             onClick={() => {
               setIsShowDeleteModal(true);
-              setTodoId(props.id);
+              setTodoId(todo.id);
             }}
           >
             <FaRegTrashAlt />
@@ -76,7 +83,7 @@ function TodoList(props) {
         </div>
 
         <ul className="todo_list">
-          {todos.map((item) => (
+          {todo.children.map((item) => (
             <li key={item.id} className="todo_item">
               <span>{item.title}</span>
               <div>
@@ -91,7 +98,7 @@ function TodoList(props) {
                 </button>
                 <button
                   className="todo_item_btn"
-                  onClick={() => removeTodo(item.id)}
+                  // onClick={() => removeTodo(item.id)}
                 >
                   <FaRegTrashAlt />
                 </button>
@@ -153,13 +160,13 @@ function TodoList(props) {
             type="text"
             className="todo_input"
             placeholder="Enter a title or paste a link"
-            value={todoNewValu}
+            value={todoNewValue}
             onChange={(event) => setTodoNewValue(event.target.value)}
           />
           <div className="delete-modal-btns">
             <button
               className="delete-btn delete-modal-accept-btn"
-              onClick={() => todoUpdate()}
+              // onClick={() => todoUpdate()}
             >
               Yes
             </button>
