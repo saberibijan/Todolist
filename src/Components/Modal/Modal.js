@@ -1,7 +1,7 @@
 import React from 'react'
 import ReactDOM from "react-dom";
+import "./Modal.css"
 
-import "./EditModal.css"
 function EditModal({children}) {
   return ReactDOM.createPortal(
       <div className="modal-parent active">

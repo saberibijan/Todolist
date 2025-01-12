@@ -2,12 +2,12 @@ import React, { useState } from "react";
 import { FaRegTrashAlt } from "react-icons/fa";
 import { IoMdClose } from "react-icons/io";
 import { MdModeEdit } from "react-icons/md";
-import { v4 as uuidv4 } from 'uuid';
-import DeleteModal from "../DeleteModal/DeleteModal";
+import { FaArrowCircleRight, FaArrowCircleLeft } from "react-icons/fa";
+import { v4 as uuidv4 } from "uuid";
+import EditModal from "../Modal/Modal";
 import "./TodoList.css";
-import EditModal from "../EditModal/EditModal";
 
-function TodoList({todo, onRemove, setTodo, todoList}) {
+function TodoList({ todo, onRemove, setTodo, todoList }) {
   const [isShowAddInput, setIsShowAddInput] = useState(false);
   const [todoTitle, setTodoTitle] = useState("");
   const [isShowDeleteModal, setIsShowDeleteModal] = useState(false);
@@ -23,12 +23,12 @@ function TodoList({todo, onRemove, setTodo, todoList}) {
         title: todoTitle,
       };
 
-      const newTodoList = todoList.map(todoListItem => {
+      const newTodoList = todoList.map((todoListItem) => {
         if (todoListItem.id === todo.id) {
           return {
             ...todo,
             children: [...todo.children, newTodoChild],
-          }
+          };
         }
         return todoListItem;
       });
@@ -39,13 +39,15 @@ function TodoList({todo, onRemove, setTodo, todoList}) {
     }
   };
 
-  // const removeTodo = (todoId) => {
-  //   let newTodos = todos.filter((todo) => {
-  //     return todo.id !== todoId;
-  //   });
-  //
-  //   setTodos(newTodos);
-  // };
+  const removeTodo = (todoId) => {
+    let newTodos = todoList.map((todoListItem) => {
+      return {
+        ...todoListItem,
+        children: todoListItem.children.filter((item) => item.id !== todoId),
+      };
+    });
+    setTodo(newTodos);
+  };
 
   const deleteModalCancelAction = () => {
     setIsShowDeleteModal(false);
@@ -56,15 +58,72 @@ function TodoList({todo, onRemove, setTodo, todoList}) {
     setIsShowDeleteModal(false);
   };
 
-  // const todoUpdate = () => {
-  //   if (todoNewValue) {
-  //     let ntodo = todos.find((item) => item.id === todoId);
-  //     ntodo.title = todoNewValue;
-  //   }
-  //
-  //   setTodoNewValue("");
-  //   setIsShowEditModal(false);
-  // };
+  const todoUpdate = () => {
+    if (todoNewValue) {
+      let newValue = todoList.map((todoListItem) => {
+        const newChildren = todoListItem.children.map((item) => {
+          if (item.id === todoId) {
+            return {
+              ...item,
+              title: todoNewValue,
+            };
+          } else {
+            return item;
+          }
+        });
+        return {
+          ...todoListItem,
+          children: newChildren,
+        };
+      });
+      setTodo(newValue);
+    }
+
+    setTodoNewValue("");
+    setIsShowEditModal(false);
+  };
+
+  const updateStatus = (todoId, newStatus) => {
+    setTodo((prevTodos) => {
+      let movedTodo = null;
+
+      const newTodos = prevTodos.map((todoListItem) => {
+        const currentTodo = todoListItem.children.find(
+          (item) => item.id === todoId
+        );
+
+        if (currentTodo) {
+          const updatedChildren = todoListItem.children.filter(
+            (item) => item.id !== todoId
+          );
+          movedTodo = currentTodo;
+
+          return {
+            ...todoListItem,
+            children: updatedChildren,
+          };
+        }
+
+        return todoListItem;
+      });
+      if (movedTodo) {
+        const destinationList = newTodos.find(
+          (item) => item.title === newStatus
+        );
+
+        if (destinationList) {
+          destinationList.children.push(movedTodo);
+        } else {
+          newTodos.push({
+            title: newStatus,
+            children: [movedTodo],
+          });
+        }
+      }
+
+      return newTodos;
+    });
+  };
 
   return (
     <div>
@@ -90,6 +149,22 @@ function TodoList({todo, onRemove, setTodo, todoList}) {
                 <button
                   className="todo_item_btn edit_btn"
                   onClick={() => {
+                    updateStatus(item.id, todo.prev);
+                  }}
+                >
+                  <FaArrowCircleLeft />
+                </button>
+                <button
+                  className="todo_item_btn edit_btn"
+                  onClick={() => {
+                    updateStatus(item.id, todo.next);
+                  }}
+                >
+                  <FaArrowCircleRight />
+                </button>
+                <button
+                  className="todo_item_btn edit_btn"
+                  onClick={() => {
                     setIsShowEditModal(true);
                     setTodoId(item.id);
                   }}
@@ -98,7 +173,7 @@ function TodoList({todo, onRemove, setTodo, todoList}) {
                 </button>
                 <button
                   className="todo_item_btn"
-                  // onClick={() => removeTodo(item.id)}
+                  onClick={() => removeTodo(item.id)}
                 >
                   <FaRegTrashAlt />
                 </button>
@@ -147,10 +222,23 @@ function TodoList({todo, onRemove, setTodo, todoList}) {
       </div>
 
       {isShowDeleteModal && (
-        <DeleteModal
-          submitAction={deleteModalSubmitAction}
-          cancelAction={deleteModalCancelAction}
-        />
+        <EditModal>
+          <h1>Are you sure to delete?</h1>
+          <div className="delete-modal-btns">
+            <button
+              className="delete-btn delete-modal-accept-btn"
+              onClick={() => deleteModalSubmitAction()}
+            >
+              Yes
+            </button>
+            <button
+              className="delete-btn delete-modal-reject-btn"
+              onClick={() => deleteModalCancelAction()}
+            >
+              No
+            </button>
+          </div>
+        </EditModal>
       )}
 
       {isShowEditModal && (
@@ -166,7 +254,7 @@ function TodoList({todo, onRemove, setTodo, todoList}) {
           <div className="delete-modal-btns">
             <button
               className="delete-btn delete-modal-accept-btn"
-              // onClick={() => todoUpdate()}
+              onClick={() => todoUpdate()}
             >
               Yes
             </button>
