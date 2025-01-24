@@ -83,47 +83,46 @@ function TodoList({ todo, onRemove, setTodo, todoList }) {
     setIsShowEditModal(false);
   };
 
-  const updateStatus = (todoId, newStatus) => {
-    setTodo((prevTodos) => {
-      let movedTodo = null;
-
-      const newTodos = prevTodos.map((todoListItem) => {
-        const currentTodo = todoListItem.children.find(
-          (item) => item.id === todoId
-        );
-
-        if (currentTodo) {
-          const updatedChildren = todoListItem.children.filter(
-            (item) => item.id !== todoId
-          );
-          movedTodo = currentTodo;
-
-          return {
-            ...todoListItem,
-            children: updatedChildren,
-          };
-        }
-
-        return todoListItem;
-      });
-      if (movedTodo) {
-        const destinationList = newTodos.find(
-          (item) => item.title === newStatus
-        );
-
-        if (destinationList) {
-          destinationList.children.push(movedTodo);
-        } else {
-          newTodos.push({
-            title: newStatus,
-            children: [movedTodo],
-          });
-        }
+  const moveTask = (taskId, direction) => {
+    setTodo(prevTodo => {
+      const statuses = prevTodo.map(status => status.title);
+  
+      const fromIndex = prevTodo.findIndex(status => 
+        status.children.some(task => task.id === taskId)
+      );
+  
+      if (fromIndex === -1) {
+        return prevTodo; 
       }
-
-      return newTodos;
+  
+      const fromStatus = prevTodo[fromIndex];
+      let nextStatusIndex = statuses.indexOf(fromStatus.title) + direction; 
+  
+      if (nextStatusIndex < 0 || nextStatusIndex >= statuses.length) {
+        return prevTodo; 
+      }
+  
+      const nextStatusTitle = statuses[nextStatusIndex];
+  
+      const toIndex = prevTodo.findIndex(status => status.title === nextStatusTitle);
+  
+      const updatedTodo = JSON.parse(JSON.stringify(prevTodo)); 
+  
+      const taskIndex = updatedTodo[fromIndex].children.findIndex(task => task.id === taskId);
+      const taskToMove = updatedTodo[fromIndex].children[taskIndex];
+  
+      if (!taskToMove) {
+        return prevTodo; 
+      }
+  
+      updatedTodo[fromIndex].children.splice(taskIndex, 1);
+  
+      updatedTodo[toIndex].children.push(taskToMove);
+  
+      return updatedTodo;
     });
   };
+  
 
   return (
     <div>
@@ -149,7 +148,7 @@ function TodoList({ todo, onRemove, setTodo, todoList }) {
                 <button
                   className="todo_item_btn edit_btn"
                   onClick={() => {
-                    updateStatus(item.id, todo.prev);
+                    moveTask(item.id, -1)
                   }}
                 >
                   <FaArrowCircleLeft />
@@ -157,7 +156,7 @@ function TodoList({ todo, onRemove, setTodo, todoList }) {
                 <button
                   className="todo_item_btn edit_btn"
                   onClick={() => {
-                    updateStatus(item.id, todo.next);
+                    moveTask(item.id, 1)
                   }}
                 >
                   <FaArrowCircleRight />
