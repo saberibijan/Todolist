@@ -11,9 +11,9 @@ function Todo() {
     const [isShowAddInput, setIsShowAddInput] = useState(false);
     const [todoTitle, setTodoTitle] = useState("");
     const [todo, setTodo] = useState([
-      {id: uuidv4(), title: 'To do', children: [], next: 'Doing' , prev: 'Done'},
-      {id: uuidv4(), title: 'Doing', children: [], next:'Done', prev: 'To do'},
-      {id: uuidv4(), title: 'Done', children: [], next: 'To do', prev: 'Doing'}
+      {id: uuidv4(), title: 'To do', children: []},
+      {id: uuidv4(), title: 'Doing', children: []},
+      {id: uuidv4(), title: 'Done', children: []}
     ])
   
   
@@ -31,6 +31,12 @@ function Todo() {
         setIsShowAddInput(false)
       }
     };
+
+    const hndleKeyUp = (event)=>{
+      if(event.keyCode === 13){
+        addTodo(event)
+      }
+    }
   
     const removeTodo = (id) => {
       let newTodo = todo.filter(item => item.id !== id);
@@ -66,6 +72,7 @@ function Todo() {
                       placeholder="Enter list name..."
                       value={todoTitle}
                       onChange={(event) => setTodoTitle(event.target.value)}
+                      onKeyUp={hndleKeyUp}
                     />
                   <div>
                     <button className="add_todo_btn" type="submit">

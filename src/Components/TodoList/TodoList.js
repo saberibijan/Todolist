@@ -39,6 +39,12 @@ function TodoList({ todo, onRemove, setTodo, todoList }) {
     }
   };
 
+  const handleKeyUd = (event)=>{
+    if(event.keyCode === 13){
+      addTodo(event)
+    }
+  }
+
   const removeTodo = (todoId) => {
     let newTodos = todoList.map((todoListItem) => {
       return {
@@ -85,8 +91,8 @@ function TodoList({ todo, onRemove, setTodo, todoList }) {
 
   const moveTask = (taskId, direction) => {
     setTodo(prevTodo => {
+
       const statuses = prevTodo.map(status => status.title);
-  
       const fromIndex = prevTodo.findIndex(status => 
         status.children.some(task => task.id === taskId)
       );
@@ -103,9 +109,7 @@ function TodoList({ todo, onRemove, setTodo, todoList }) {
       }
   
       const nextStatusTitle = statuses[nextStatusIndex];
-  
       const toIndex = prevTodo.findIndex(status => status.title === nextStatusTitle);
-  
       const updatedTodo = JSON.parse(JSON.stringify(prevTodo)); 
   
       const taskIndex = updatedTodo[fromIndex].children.findIndex(task => task.id === taskId);
@@ -116,7 +120,6 @@ function TodoList({ todo, onRemove, setTodo, todoList }) {
       }
   
       updatedTodo[fromIndex].children.splice(taskIndex, 1);
-  
       updatedTodo[toIndex].children.push(taskToMove);
   
       return updatedTodo;
@@ -200,6 +203,7 @@ function TodoList({ todo, onRemove, setTodo, todoList }) {
                 placeholder="Enter a title or paste a link"
                 value={todoTitle}
                 onChange={(event) => setTodoTitle(event.target.value)}
+                onKeyUp={handleKeyUd}
               />
               <div>
                 <button className="add_todo_btn" type="submit">
